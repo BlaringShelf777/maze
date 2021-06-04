@@ -1,0 +1,131 @@
+
+:root {
+    --row_item_size: 50px;
+}
+
+/* Reset */
+* {
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box; 
+}
+/* Reset */
+
+/* HTML, Body */
+body {
+    background-color: rgb(29, 29, 29);
+}
+/* HTML, Body */
+
+/* Maze Row */
+div.maze__row {
+    display: flex;
+}
+/* Maze Row */
+
+/* Maze Row Item */
+div.maze__row div.row__item {
+    width: var(--row_item_size);
+    height: var(--row_item_size);
+}
+
+/** Walls */
+div.maze__row div.row__item--wall {
+    background-color: rgb(136, 136, 136);
+}
+
+/** Blank */
+div.maze__row div.row__item--blank {
+    background-size: cover;
+}
+
+/** Start */
+div.maze__row div.row__item--start {
+    background-color: rgb(189, 124, 124);
+} 
+
+/** End */ 
+div.maze__row div.row__item--end {
+    background-color: rgb(122, 184, 122);
+}
+/* Maze Row Item */
+
+/* Player */
+div.maze__player {
+    width: 50px;
+    height: 50px;
+    position: absolute;
+    transition: all 0.25s ease;
+    background: url('../img/moves/indi/move_1.png');
+    background-size: cover;
+}
+
+div.maze__player.player__animation--l_or_r {
+    animation: move_l_or_r 0.5s infinite;
+}
+
+div.maze__player.player__facing--left {
+    transform: scaleX(-1);
+}
+
+div.maze__player.player__facing--top {
+    animation: move_top 0.5s infinite;
+}
+
+@keyframes move_l_or_r {
+    0% {
+        background-image: url('../img/moves/indi/move_1.png');
+    }
+    15% {
+        background-image: url('../img/moves/indi/move_2.png');
+    }
+    25% {
+        background-image: url('../img/moves/indi/move_3.png');
+    }
+    35% {
+        background-image: url('../img/moves/indi/move_4.png');
+    }
+    45% {
+        background-image: url('../img/moves/indi/move_5.png');
+    }
+    55% {
+        background-image: url('../img/moves/indi/move_6.png');
+    }
+    65% {
+        background-image: url('../img/moves/indi/move_7.png');
+    }
+    75% {
+        background-image: url('../img/moves/indi/move_8.png');
+    }
+    85% {
+        background-image: url('../img/moves/indi/move_9.png');
+    }
+    100% {
+        background-image: url('../img/moves/indi/move_1.png');
+    }
+}
+
+@keyframes move_top {
+    0% {
+        background-image: url('../img/moves/indi/move_top_1.png');
+    }
+    17% {
+        background-image: url('../img/moves/indi/move_top_2.png');
+    }
+    34% {
+        background-image: url('../img/moves/indi/move_top_3.png');
+    }
+    51% {
+        background-image: url('../img/moves/indi/move_top_4.png');
+    }
+    68% {
+        background-image: url('../img/moves/indi/move_top_5.png');
+    }
+    85% {
+        background-image: url('../img/moves/indi/move_top_6.png');
+    }
+    100% {
+        background-image: url('../img/moves/indi/move_top_1.png');
+    }
+}
+/* Player */
