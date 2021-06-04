@@ -60,7 +60,7 @@ div.maze__player {
     background-size: cover;
 }
 
-div.maze__player.player__animation--l_or_r {
+div.maze__player.player__facing--l_or_r {
     animation: move_l_or_r 0.5s infinite;
 }
 
@@ -70,6 +70,10 @@ div.maze__player.player__facing--left {
 
 div.maze__player.player__facing--top {
     animation: move_top 0.5s infinite;
+}
+
+div.maze__player.player__facing--bottom {
+    animation: move_bottom 0.5s infinite;
 }
 
 @keyframes move_l_or_r {
@@ -126,6 +130,30 @@ div.maze__player.player__facing--top {
     }
     100% {
         background-image: url('../img/moves/indi/move_top_1.png');
+    }
+}
+
+@keyframes move_bottom {
+    0% {
+        background-image: url('../img/moves/indi/move_bottom_1.png');
+    }
+    17% {
+        background-image: url('../img/moves/indi/move_bottom_2.png');
+    }
+    34% {
+        background-image: url('../img/moves/indi/move_bottom_3.png');
+    }
+    51% {
+        background-image: url('../img/moves/indi/move_bottom_4.png');
+    }
+    68% {
+        background-image: url('../img/moves/indi/move_bottom_5.png');
+    }
+    85% {
+        background-image: url('../img/moves/indi/move_bottom_6.png');
+    }
+    100% {
+        background-image: url('../img/moves/indi/move_bottom_1.png');
     }
 }
 /* Player */

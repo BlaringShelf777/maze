@@ -4,6 +4,7 @@ const body = document.querySelector('body')
 const rand_in_range = (min, max) => Math.floor(Math.random() * (max + 1)) + min
 
 const maze = {
+    maze_item_size: 50,
     map: {
         path:[
             "WWWWWWWWWWWWWWWWWWWWW",
@@ -76,11 +77,9 @@ const maze = {
             }
         }
     },
-    maze_item_size: 50,
     player: {
         x: 0,
         y: 0,
-        animation_id: null,
         cool_down: false,
         facing: 'right',
         create_player() {
@@ -108,6 +107,7 @@ const maze = {
                     case 'w':
                         if (this.y && 
                             maze.map.path[this.y - 1][this.x] !== 'W') this.y--
+                        this.facing = 'top'
                         break
                     case 'arrowright':
                     case 'd':
@@ -119,6 +119,7 @@ const maze = {
                     case 's':
                         if (this.y < maze.map.path.length - 1 &&
                             maze.map.path[this.y + 1][this.x] !== 'W') this.y++
+                        this.facing = 'bottom'
                         break
                     case 'arrowleft':
                     case 'a':
@@ -137,21 +138,39 @@ const maze = {
         },
         render_player() {
             const player_el = document.querySelector('div.maze__player')
-            let animation_name = ''
+            const new_animation = maze.animation.name(this.facing)
 
             player_el.style.top = `${this.y * maze.maze_item_size}px`
             player_el.style.left = `${this.x * maze.maze_item_size}px`
-            if (this.facing === 'left') player_el.classList.add('player__facing--left')
-            else if(this.facing === 'right') player_el.classList.remove('player__facing--left')
+            if(this.facing !== 'left') player_el.classList.remove('player__facing--left')
+            else player_el.classList.add('player__facing--left')
+
+            if (this.facing === 'bottom')
+                player_el.style.backgroundImage = 'url(assets/img/moves/indi/move_bottom_1.png)'
+            else if (this.facing === 'top')
+                player_el.style.backgroundImage = 'url(assets/img/moves/indi/move_top_1.png)'
+            else
+                player_el.style.backgroundImage = 'url(assets/img/moves/indi/move_1.png)'
             
-            if (this.facing === 'left' || this.facing === 'right') {
-                animation_name = 'player__animation--l_or_r'
+            if (maze.animation.cur_name !== new_animation) {
+                player_el.classList.remove(maze.animation.cur_name)
+                clearTimeout(maze.animation.cur_id)
             }
-            player_el.classList.add(animation_name)
-            clearTimeout(this.animation_id)
-            this.animation_id = setTimeout( _ => player_el.classList.remove(animation_name), 400)
+            maze.animation.cur_name = new_animation
+            player_el.classList.add(maze.animation.cur_name)
+            clearTimeout(maze.animation.cur_id)
+            maze.animation.cur_id = setTimeout( _ => player_el.classList.remove(maze.animation.cur_name), 400)
             if (this.x === maze.map.end.x && this.y === maze.map.end.y) 
                 console.log('WIN')
+        }
+    },
+    animation: {
+        cur_name: null,
+        cur_id: null,
+        name(face) {
+            if (face === 'top') return 'player__facing--top'
+            else if (face === 'bottom') return 'player__facing--bottom'
+            else return 'player__facing--l_or_r'
         }
     }
 }
