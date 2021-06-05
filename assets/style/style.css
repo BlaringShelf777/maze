@@ -8,20 +8,69 @@
     padding: 0;
     margin: 0;
     box-sizing: border-box; 
+    font-family: 'Press Start 2P', cursive;
 }
 /* Reset */
 
 /* HTML, Body */
+html, body {
+    width: 100%;
+    height: 100vh;
+}
 body {
     background-color: rgb(29, 29, 29);
 }
 /* HTML, Body */
 
+/* Maze */
+div.container {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-image: url('../img/bg/bg.png');
+    background-size: cover;
+    background-repeat: no-repeat;
+    position: relative;
+    gap: 2rem;
+}
+
+div.container::after {
+    content: '';
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    background-color: rgba(0, 0, 0, 0.4);
+    z-index: 1;
+}
+
+div.container::before {
+    content: '';
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    background: radial-gradient(transparent, rgba(0,0,0, 0.5));
+    z-index: 1;
+}
+
+div.maze {
+    position: relative;
+    border: 2rem solid brown;
+    border-image: url('../img/border/border_model.png') 33% repeat;
+    z-index: 2;
+}
+/* Maze */
+
 /* Maze Row */
 div.maze__row {
     display: flex;
 }
-/* Maze Row */
+/* Maze Rows */
 
 /* Maze Row Item */
 div.maze__row div.row__item {
@@ -29,25 +78,25 @@ div.maze__row div.row__item {
     height: var(--row_item_size);
 }
 
-/** Walls */
-div.maze__row div.row__item--wall {
-    background-color: rgb(136, 136, 136);
-}
-
-/** Blank */
-div.maze__row div.row__item--blank {
-    background-size: cover;
-}
-
-/** Start */
-div.maze__row div.row__item--start {
-    background-color: rgb(189, 124, 124);
-} 
-
-/** End */ 
+/** Walls && Blank && Start && End*/
+div.maze__row div.row__item--wall,
+div.maze__row div.row__item--blank,
+div.maze__row div.row__item--start,
 div.maze__row div.row__item--end {
-    background-color: rgb(122, 184, 122);
+    background-size: cover;
+    position: relative;
 }
+
+div.maze__row div.row__item--blank::after, 
+div.maze__row div.row__item--start::after {
+    content: '';
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    background-color: rgba(0, 0, 0, 0.4);
+} 
 /* Maze Row Item */
 
 /* Player */
@@ -58,6 +107,7 @@ div.maze__player {
     transition: all 0.25s ease;
     background: url('../img/moves/indi/move_1.png');
     background-size: cover;
+    z-index: 100;
 }
 
 div.maze__player.player__facing--l_or_r {
@@ -157,3 +207,65 @@ div.maze__player.player__facing--bottom {
     }
 }
 /* Player */
+
+/* Key */
+div.maze__key {
+    width: var(--row_item_size);
+    height: var(--row_item_size);
+    position: absolute;
+    z-index: 50;
+    background-size: cover;
+    transform: rotate(270deg) scaleX(-1);
+}
+/* Key */
+
+/* Info */
+div.info {
+    width: 400px;
+    height:  813px;
+    background-color: rgba(0,0,0, 0.5);
+    z-index: 2;
+    border: 2rem solid brown;
+    border-image: url('../img/border/border_model.png') 33% repeat;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-direction: column;
+}
+
+p.info__item {
+    color: #feee2d;
+    font-size: 1.75rem;
+    text-align: center;
+}
+
+p.info__item--timer {
+    margin: 4rem 2rem;
+}
+
+p.info__item--score__val,
+p.info__item--score__title {
+    margin: 0.5rem;
+}
+
+div.info__score {
+    margin-bottom: 4rem;
+}
+
+div.info__item--inventory__storage {
+    padding: 2rem;
+}
+
+div.info__item--inventory__storage div.inventory__item {
+    width: 50px;
+    height: 50px;
+    background-image: url('../img/key/key.png');
+    background-size: cover;
+    transform: rotate(45deg);
+}
+
+button.info__restart {
+    padding: 1rem 3rem;
+    margin: 0 0 3rem;
+}
+/* Info */

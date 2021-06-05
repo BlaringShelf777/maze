@@ -1,8 +1,11 @@
-const body = document.querySelector('body')
-
+const maze_el = document.querySelector('div.maze')
+const restart_button = document.querySelector('button.info__restart')
 // Random number between min and max (inclusive)
 const rand_in_range = (min, max) => Math.floor(Math.random() * (max + 1)) + min
+const format_num = n => n < 10 ? `0${n}` : n
 
+
+let first_move = true
 const maze = {
     maze_item_size: 50,
     map: {
@@ -19,13 +22,14 @@ const maze = {
             "S     W W W W W W WWW",
             "WWWWW W W W W W W W W",
             "W     W W W   W W W W",
-            "W WWWWWWW WWWWW W W W",
+            "W WWWWW W WWWWW W W W",
             "W       W       W   W",
             "WWWWWWWWWWWWWWWWWWWWW",
         ],
         start: {},
         end: {},
         create_map() {
+            maze.textures.wall.wall_set = rand_in_range(0, maze.textures.wall.path.length - 1)
             this.path.forEach((row, i) => {
                 const maze_row = document.createElement('div')
                 
@@ -34,34 +38,59 @@ const maze = {
             
                     maze_item.classList.add('row__item')
                     // Wall
-                    if (letter === 'W') maze_item.classList.add('row__item--wall')
+                    if (letter === 'W') {
+                        maze_item.classList.add('row__item--wall')
+                        maze.textures.set_wall_texture(maze_item)
+                    }
                     // Blank
                     else if(letter === ' ') {
                         maze_item.classList.add('row__item--blank')
-                        maze.textures.set_texture('blank', maze_item)
+                        maze.textures.set_black_texture(maze_item)
                     }
                     // Start
                     else if (letter === 'S') {
+                        const new_row = maze.map.path[i].split('')
+
                         this.start = {
                             x:j, 
                             y:i
                         }
                         maze.player.create_player()
                         maze_item.classList.add('row__item--start') 
+                        maze.textures.set_black_texture(maze_item)   
+                        new_row[j] = 'W'
+                        maze.map.path[i] = new_row.join('')                     
                     }
                     // End
                     else {
+                        const new_row = maze.map.path[i].split('')
+
                         this.end = {
                             x:j, 
                             y:i
                         }
                         maze_item.classList.add('row__item--end') 
+                        maze_item.style.backgroundImage = "url('assets/img/walls/end.png')"
+                        new_row[j] = 'W'
+                        maze.map.path[i] = new_row.join('')
                     }
                     maze_row.appendChild(maze_item)
                 })
                 maze_row.classList.add('maze__row')
-                body.appendChild(maze_row)
+                maze_el.appendChild(maze_row)
             })
+            maze.key.create_key()
+        }, 
+        reset() {
+            const maze_map = document.querySelector('div.maze')
+
+            maze_map.innerHTML = ''
+            this.path = this.path.map((row, j) => row.split('').map((l, i) => {
+                if (i === this.end.x && j === this.end.y) return 'F'
+                else if (i === this.start.x && j === this.start.y) return 'S'
+                else if (l !== ' ' && l !== 'W') return ' '
+                else return l
+            }).join(''))
         }
     },
     textures: {
@@ -70,11 +99,53 @@ const maze = {
             'assets/img/blank/rocks_2.png',
             'assets/img/blank/rocks_3.png'
         ],
-
-        set_texture(area, el) {
-            if (area === 'blank') {
-                el.style.backgroundImage = `url('${this.blank[rand_in_range(0, this.blank.length - 1)]}')`
-            }
+        wall: {
+            wall_set: null,
+            path: [
+                [
+                    'assets/img/walls/w_1_7.png',
+                    'assets/img/walls/w_1_1.png', 
+                    'assets/img/walls/w_1_2.png',
+                    'assets/img/walls/w_1_7.png',
+                    'assets/img/walls/w_1_3.png',
+                    'assets/img/walls/w_1_4.png',
+                    'assets/img/walls/w_1_7.png',
+                    'assets/img/walls/w_1_5.png',
+                    'assets/img/walls/w_1_6.png',
+                    'assets/img/walls/w_1_7.png'
+                ],
+                [
+                    'assets/img/walls/w_2_1.png', 
+                    'assets/img/walls/w_2_2.png',
+                    'assets/img/walls/w_2_3.png',
+                    'assets/img/walls/w_2_4.png',
+                    'assets/img/walls/w_2_1.png',
+                    'assets/img/walls/w_2_5.png',
+                    'assets/img/walls/w_2_6.png'
+                ],
+                [
+                    'assets/img/walls/w_3_1.png',
+                    'assets/img/walls/w_3_2.png', 
+                    'assets/img/walls/w_3_3.png',
+                    'assets/img/walls/w_3_5.png',
+                    'assets/img/walls/w_3_8.png',
+                    'assets/img/walls/w_3_9.png',
+                    'assets/img/walls/w_3_11.png',
+                    'assets/img/walls/w_3_12.png', 
+                    'assets/img/walls/w_3_13.png',
+                    'assets/img/walls/w_3_14.png',
+                    'assets/img/walls/w_3_15.png',
+                    'assets/img/walls/w_3_16.png',
+                    'assets/img/walls/w_3_17.png',
+                    'assets/img/walls/w_3_18.png'
+                ]
+            ]
+        },
+        set_black_texture(el) {
+            el.style.backgroundImage = `url('${this.blank[rand_in_range(0, this.blank.length - 1)]}')`
+        },
+        set_wall_texture(el) {
+            el.style.backgroundImage = `url('${this.wall.path[this.wall.wall_set][rand_in_range(0, this.wall.path[this.wall.wall_set].length - 1)]}')`
         }
     },
     player: {
@@ -91,7 +162,7 @@ const maze = {
             player_el.style.top = `${this.y * maze.maze_item_size}px`
             player_el.style.left = `${this.x * maze.maze_item_size}px`
             document.addEventListener('keydown', evt => this.move_player(evt.key))
-            body.appendChild(player_el)
+            maze_el.appendChild(player_el)
         },
         reset_player() {
             this.x = maze.map.start.x
@@ -131,6 +202,10 @@ const maze = {
                         valid_move = false
                 }
             if (valid_move && !this.cool_down) {
+                if (first_move) {
+                    first_move = false
+                    maze.timer.start()
+                }
                 this.render_player()
                 this.cool_down = true
                 setTimeout( _ => this.cool_down = false, 210)
@@ -160,8 +235,64 @@ const maze = {
             player_el.classList.add(maze.animation.cur_name)
             clearTimeout(maze.animation.cur_id)
             maze.animation.cur_id = setTimeout( _ => player_el.classList.remove(maze.animation.cur_name), 400)
-            if (this.x === maze.map.end.x && this.y === maze.map.end.y) 
-                console.log('WIN')
+            // key
+            if (this.x === maze.key.x && this.y === maze.key.y && !maze.key.found) {
+                const key_el = document.querySelector('div.maze__key')
+                const key_inv = document.createElement('div')
+                const inventory = document.querySelector('div.info__item--inventory__storage')
+                const end_el = document.querySelector('div.row__item--end')
+                let new_row = maze.map.path[maze.map.end.y].split('')
+
+                maze.key.found = true
+                new_row[maze.map.end.x] = ' '
+                maze.map.path[maze.map.end.y] = new_row.join('')
+                key_el.remove()
+                key_inv.classList.add('inventory__item')
+                inventory.appendChild(key_inv)
+                end_el.style.backgroundImage = "url('assets/img/blank/rocks_1.png')"
+            }
+            if (this.x === maze.map.end.x && this.y === maze.map.end.y) {
+                clearInterval(maze.timer.id)
+            }
+            
+        }, 
+        reset() {
+            this.x = 0
+            this.y = 0
+            this.cool_down = false
+            this.facing = 'right'
+        }
+    },
+    key: {
+        found: false,
+        x: null,
+        y: null,
+        create_key() {
+            const key_el = document.createElement('div')
+
+            key_el.classList.add('maze__key')
+            key_el.style.backgroundImage = "url('assets/img/key/key.png')"
+            this.generate_position()
+            this.render_key(key_el)
+            maze_el.appendChild(key_el)
+        },
+        render_key(el) {
+            el.style.top = `${this.y * maze.maze_item_size}px`
+            el.style.left = `${this.x * maze.maze_item_size}px`
+        },
+        generate_position() {
+            this.y = rand_in_range(1, maze.map.path.length - 3)
+            let possible_x = maze.map.path[this.y].split('').map((l, i) => [l, i]).filter(t => t[0] === ' ')
+            this.x = rand_in_range(0, possible_x.length - 1)
+            this.x = possible_x[this.x][1]
+            let new_row = maze.map.path[this.y].split('')
+            new_row[this.x] = 'K'
+            maze.map.path[this.y] = new_row.join('')
+        },
+        reset() {
+            this.found = false
+            this.x = null
+            this.y = null
         }
     },
     animation: {
@@ -171,8 +302,57 @@ const maze = {
             if (face === 'top') return 'player__facing--top'
             else if (face === 'bottom') return 'player__facing--bottom'
             else return 'player__facing--l_or_r'
+        },
+        reset() {
+            this.cur_name = null
+            this.cur_id = null
         }
+    },
+    timer: {
+        hour: 0,
+        min: 0,
+        sec: 0,
+        id: null,
+        start() {
+            const timer_area = document.querySelector('p.info__item--timer')
+            this.min = this.sec = this.hour = 0
+        
+            this.id = setInterval( _ => {    
+                if (++(this.sec) === 60) {
+                    this.min += 1
+                    this.sec = 0
+                }
+            
+                if (this.min === 60) {
+                    this.min = 0
+                    this.hour += 1
+                }
+                timer_area.innerText = `${format_num(this.hour)}:${format_num(this.min)}:${format_num(this.sec)}`
+            }, 1000)
+        },
+        reset() {
+            clearInterval(this.id)
+            this.id = null
+        }
+    },
+    reset() {
+        const timer_area = document.querySelector('p.info__item--timer')
+        const score_area = document.querySelector('p.info__item--score__val') 
+        const inventory_area = document.querySelector('div.info__item--inventory__storage')
+
+        timer_area.innerText = '00:00:00'
+        score_area.innerText = '0000000'
+        inventory_area.innerHTML = ''
+        this.timer.reset()
+        this.animation.reset()
+        this.key.reset()
+        this.player.reset()
+        this.map.reset()
+        first_move = true 
+        maze.map.create_map()  
     }
 }
 
 maze.map.create_map()
+
+restart_button.addEventListener('click', _ => maze.reset())
