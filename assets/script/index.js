@@ -80,6 +80,7 @@ const maze = {
                 maze_el.appendChild(maze_row)
             })
             maze.key.create_key()
+            maze.gems.create_geams()
         }, 
         reset() {
             const maze_map = document.querySelector('div.maze')
@@ -146,13 +147,20 @@ const maze = {
         },
         set_wall_texture(el) {
             el.style.backgroundImage = `url('${this.wall.path[this.wall.wall_set][rand_in_range(0, this.wall.path[this.wall.wall_set].length - 1)]}')`
-        }
+        },
+        gems: [
+            'assets/img/gems/gem_1.gif',
+            'assets/img/gems/gem_2.gif',
+            'assets/img/gems/gem_3.gif'
+        ]
     },
     player: {
         x: 0,
         y: 0,
         cool_down: false,
         facing: 'right',
+        won: false,
+        score: 0,
         create_player() {
             const player_el = document.createElement('div')
 
@@ -172,7 +180,7 @@ const maze = {
         move_player(key) {
             let valid_move = true
 
-            if (!this.cool_down)
+            if (!this.cool_down && !this.won)
                 switch (key.toLowerCase()) {
                     case 'arrowup':
                     case 'w':
@@ -201,14 +209,14 @@ const maze = {
                     default:
                         valid_move = false
                 }
-            if (valid_move && !this.cool_down) {
+            if (valid_move && !this.cool_down && !this.won) {
                 if (first_move) {
                     first_move = false
                     maze.timer.start()
                 }
                 this.render_player()
                 this.cool_down = true
-                setTimeout( _ => this.cool_down = false, 210)
+                setTimeout( _ => this.cool_down = false, 100)
             }
         },
         render_player() {
@@ -251,8 +259,30 @@ const maze = {
                 inventory.appendChild(key_inv)
                 end_el.style.backgroundImage = "url('assets/img/blank/rocks_1.png')"
             }
+            // Gem
+            maze.gems.gems_arr.every(gem => {
+                if (this.x === gem.x && this.y === gem.y && gem.active) {
+                    const gem_el = document.getElementById(`gem_${gem.id}`)
+
+                    this.score += 1000
+                    gem_el.remove()
+                    maze.score.render_score()
+                    gem.active = false
+                    return false
+                }
+                return true
+            })
+            // Win
             if (this.x === maze.map.end.x && this.y === maze.map.end.y) {
+                const win_are = document.querySelector('div.win')
+
                 clearInterval(maze.timer.id)
+                win_are.classList.toggle('hidden')
+                this.won = true
+                setTimeout( _ => {
+                    win_are.classList.toggle('hidden')
+                    maze.reset()
+                }, 8000)
             }
             
         }, 
@@ -261,6 +291,8 @@ const maze = {
             this.y = 0
             this.cool_down = false
             this.facing = 'right'
+            this.won = false
+            this.score = 0
         }
     },
     key: {
@@ -335,6 +367,81 @@ const maze = {
             this.id = null
         }
     },
+    gems: {
+        max: 12,
+        min: 5,
+        amount: null,
+        gems_arr: [],
+        start() {
+            this.amount = rand_in_range(this.min, this.max)
+        },
+        create_gem(x, y, id) {
+            const new_gem = {
+                x,
+                y,
+                id,
+                active: true
+            }
+
+            this.gems_arr.push(new_gem)
+        },
+        create_geams() { 
+            let created_geams = 0
+
+            this.start()
+            while (created_geams !== this.amount) {
+                const y = rand_in_range(1, maze.map.path.length - 3)
+                let row = maze.map.path[y].split('').map((l, i) => [l, i]).filter(t => t[0] === ' ')
+
+                if (row.length) {
+                    let x = rand_in_range(0, row.length - 1)
+                    let new_row = maze.map.path[y].split('')
+                    
+                    x = row[x][1]
+                    new_row[x] = 'G'
+                    maze.map.path[y] = new_row.join('')
+                    this.create_gem(x, y, created_geams)
+                    created_geams++
+                }
+            }
+            this.render_gems()
+        },
+        render_gems() {
+            this.gems_arr.forEach(gem => {
+                const gem_el = document.createElement('div')
+                const gem_texture = rand_in_range(0, maze.textures.gems.length - 1)
+
+                gem_el.classList.add('gem')
+                gem_el.setAttribute('id', `gem_${gem.id}`)
+                gem_el.style.top = `${maze.maze_item_size * gem.y}px`
+                gem_el.style.left = `${maze.maze_item_size * gem.x}px`
+                gem_el.style.backgroundImage = `url('${maze.textures.gems[gem_texture]}')`
+                maze_el.appendChild(gem_el)
+            })
+        },
+        reset() {
+            this.max = 12
+            this.min = 5
+            this.amount = null
+            this.gems_arr = []
+        }
+    },
+    score: {
+        render_score() {
+            const score_area = document.querySelector('p.info__item--score__val')
+
+            score_area.innerText = this.parse_score(String(maze.player.score))
+        },
+        parse_score(n) {
+            if (n.length < 7) {
+                n = n.split('')
+                for (let i = 0; i <= 7 - n.length + 1; i++)
+                    n.unshift('0')
+                n = n.join('')
+            }
+            return n
+        }
+    },
     reset() {
         const timer_area = document.querySelector('p.info__item--timer')
         const score_area = document.querySelector('p.info__item--score__val') 
@@ -348,6 +455,7 @@ const maze = {
         this.key.reset()
         this.player.reset()
         this.map.reset()
+        this.gems.reset()
         first_move = true 
         maze.map.create_map()  
     }
